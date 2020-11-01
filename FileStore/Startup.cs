@@ -1,9 +1,15 @@
+using FileStore.DataAccess;
+using FileStore.DataAccess.Documents;
+using FileStore.Domain.Documents;
+using FileStore.Domain.Settings;
+using FileStore.Infrastructure.BlobStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace FileStore
 {
@@ -19,17 +25,24 @@ namespace FileStore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            var settings = Configuration.GetSection("AppSettings").Get<Settings>();
+            services.AddSingleton<ISettings>(settings);
+            services.AddDbContext<FileStoreDbContext>();
+            services.AddTransient<IDocumentRepository, DocumentRepository>();
+            services.AddTransient<IDocumentService, DocumentService>();
+            services.AddSingleton<IDocumentStore, BlobStorage>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -42,12 +55,13 @@ namespace FileStore
 
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+            app.UseRouting();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                   pattern: "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>

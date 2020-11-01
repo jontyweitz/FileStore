@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using FileStore.Domain.Documents;
+using FileStore.Infrastructure.BlobStorage;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace FileStore
 {
@@ -14,7 +9,10 @@ namespace FileStore
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            var webhost = CreateWebHostBuilder(args).Build();
+            var blobStorage = (BlobStorage)webhost.Services.GetService(typeof(IDocumentStore));
+            blobStorage.Init();
+            webhost.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
