@@ -10,8 +10,7 @@ export class Documents extends Component {
 
         fetch('api/Document/ListDocuments')
             .then(response => response.json())
-            .then(data => {
-                console.log(data)
+            .then(data => {                
                 this.setState({ documents: data, loading: false });
             });
     }
