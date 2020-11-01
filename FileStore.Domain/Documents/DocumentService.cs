@@ -17,7 +17,7 @@ namespace FileStore.Domain.Documents
         {
             try
             {
-                documentRepository.Add(document);
+                documentRepository.Add(document);                
                 await documentStore.Upload(document.Key.ToString(), document.Bytes);
             }
             catch

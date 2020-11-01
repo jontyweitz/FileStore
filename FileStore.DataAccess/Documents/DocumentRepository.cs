@@ -31,8 +31,7 @@ namespace FileStore.DataAccess.Documents
 
         public void Delete(int id)
         {
-            var document = new Document { Id = id };
-            dbContext.Documents.Attach(document);
+            var document = dbContext.Documents.Find(id);            
             dbContext.Documents.Remove(document);
             dbContext.SaveChanges();
         }
